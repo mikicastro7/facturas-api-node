@@ -1,10 +1,8 @@
 const { generaError } = require("../utils/errors");
 const facturasJSON = require("../facturas.json").facturas;
+const facturasParamsQuery = require("../utils/facturasParamsQuery");
 
-const getFacturas = () => ({
-  total: facturasJSON.length,
-  datos: facturasJSON
-});
+const getFacturas = (query) => facturasParamsQuery(query, facturasJSON);
 
 const getFactura = id => {
   const factura = facturasJSON.find(factura => factura.id === id);
@@ -21,13 +19,7 @@ const getFactura = id => {
   return respuesta;
 };
 
-const getFacturasTipo = (tipo) => {
-  const facturas = facturasJSON.filter(factura => factura.tipo === tipo);
-  return {
-    total: facturas.length,
-    datos: facturas
-  };
-};
+const getFacturasTipo = (tipo, query) => facturasParamsQuery(query, facturasJSON.filter(factura => factura.tipo === tipo));
 
 const crearFactura = (facturaNueva) => {
   const respuesta = {

@@ -7,7 +7,7 @@ const cors = require("cors");
 const options = require("./parametrosCLI");
 const rutasFacturas = require("./rutas/facturas");
 const {
-  generaError, serverError, notFoundError, generalError
+  serverError, notFoundError, generalError
 } = require("./utils/errors");
 
 const app = express();
