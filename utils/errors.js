@@ -28,9 +28,37 @@ const generalError = (err, req, res, next) => {
   res.status(error.codigo).json({ error: true, mensaje: error.mensaje });
 };
 
+const badRequestError = req => {
+  const errores = validationResult(req);
+  let error;
+  if (!errores.isEmpty()) {
+    const mapaErrores = errores.mapped();
+    if (mapaErrores.nota || mapaErrores.nombre || mapaErrores.apellidos) {
+      error = generaError("El alumno no tiene la forma correcta", 400);
+      console.log(errores.mapped());
+    }
+  }
+  return error;
+};
+
+const idNoExisteError = req => {
+  const errores = validationResult(req);
+  let error;
+  if (!errores.isEmpty()) {
+    const mapaErrores = errores.mapped();
+    if (mapaErrores.id) {
+      error = generaError(mapaErrores.id.msg, 404);
+      console.log(mapaErrores);
+    }
+  }
+  return error;
+};
+
 module.exports = {
   generaError,
   serverError,
   notFoundError,
   generalError,
+  badRequestError,
+  idNoExisteError
 };

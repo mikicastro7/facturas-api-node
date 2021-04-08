@@ -27,7 +27,7 @@ const crearFactura = (facturaNueva) => {
     error: null
   };
   if (facturasJSON.find(factura => factura.numero === facturaNueva.numero)) {
-    const error = generaError(`Ya existe el la factura con numero${facturaNueva.numero}`, 409);
+    const error = generaError(`Ya existe el la factura con numero ${facturaNueva.numero}`, 409);
     respuesta.error = error;
   }
   if (!respuesta.error) {
@@ -38,9 +38,31 @@ const crearFactura = (facturaNueva) => {
   return respuesta;
 };
 
+const sustituirFactura = (idFactura, facturaModificada) => {
+  const factura = facturasJSON.find(factura => factura.id === idFactura);
+  const respuesta = {
+    factura: null,
+    error: null
+  };
+  if (factura) {
+    facturaModificada.id = factura.id;
+    facturasJSON[facturasJSON.indexOf(factura)] = facturaModificada;
+    respuesta.factura = facturaModificada;
+  } else {
+    const { error, factura } = crearFactura(facturaModificada);
+    if (error) {
+      respuesta.error = error;
+    } else {
+      respuesta.factura = factura;
+    }
+  }
+  return respuesta;
+};
+
 module.exports = {
   getFacturas,
   getFactura,
   getFacturasTipo,
-  crearFactura
+  crearFactura,
+  sustituirFactura
 };
