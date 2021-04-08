@@ -6,7 +6,7 @@ const facturasJSON = require("../facturas.json").facturas;
 const { generaError, badRequestError, idNoExisteError } = require("../utils/errors");
 
 const {
-  getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura
+  getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura, modificarFactura
 } = require("../controladores/facturasController");
 
 const compruebaId = idFactura => facturasJSON.find(factura => factura.id === +idFactura);
@@ -101,6 +101,27 @@ router.put("/factura/:idFactura",
       next(error);
     } else {
       res.json({ factura });
+    }
+  });
+
+router.patch("/factura/:idFactura",
+  checkSchema(facturasShema),
+  (req, res, next) => {
+    const error400 = badRequestError(req);
+    if (error400) {
+      return next(error400);
+    }
+    const errorIdNoExiste = idNoExisteError(req);
+    if (errorIdNoExiste) {
+      return next(errorIdNoExiste);
+    }
+    const idFactura = +req.params.idFactura;
+    const facturaModificada = req.body;
+    const { error, factura } = modificarFactura(idFactura, facturaModificada);
+    if (error) {
+      next(error);
+    } else {
+      res.json(factura);
     }
   });
 

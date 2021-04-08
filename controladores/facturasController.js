@@ -59,10 +59,26 @@ const sustituirFactura = (idFactura, facturaModificada) => {
   return respuesta;
 };
 
+const modificarFactura = (idFactura, cambios) => {
+  const factura = facturasJSON.find(factura => factura.id === idFactura);
+  const respuesta = {
+    factura: null,
+    error: null
+  };
+  const facturaModificada = {
+    ...factura,
+    ...cambios
+  };
+  facturasJSON[facturasJSON.indexOf(factura)] = facturaModificada;
+  respuesta.factura = facturaModificada;
+  return respuesta;
+};
+
 module.exports = {
   getFacturas,
   getFactura,
   getFacturasTipo,
   crearFactura,
-  sustituirFactura
+  sustituirFactura,
+  modificarFactura
 };
