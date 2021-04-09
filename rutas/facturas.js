@@ -118,9 +118,9 @@ router.post("/factura",
   });
 
 router.put("/factura/:idFactura",
+  check("idFactura", "No existe la factura").custom(compruebaId),
   checkSchema(facturaCompletaSchema),
   (req, res, next) => {
-    console.log(req.body);
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
@@ -136,6 +136,7 @@ router.put("/factura/:idFactura",
   });
 
 router.patch("/factura/:idFactura",
+  check("idFactura", "No existe la factura").custom(compruebaId),
   checkSchema(facturaParcialSchema),
   (req, res, next) => {
     console.log(req.body);
