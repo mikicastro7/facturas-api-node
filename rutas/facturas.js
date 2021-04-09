@@ -25,6 +25,11 @@ const facturasShema = {
       errorMessage: "El tipo IVA es integer",
     }
   },
+  tipo: {
+    custom: {
+      options: value => value === "gasto" || value === "ingreso"
+    }
+  }
 };
 
 router.get("/", (req, res, next) => {
