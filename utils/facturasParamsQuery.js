@@ -15,15 +15,15 @@ const facturasParamsQuery = (queryParams, facturas) => {
       const campo = queryParams[queryField];
       if (camposOrden.includes(campo)) {
         if (queryParams.orden) {
-          if (queryParams.orden === "asc") resultado.facturasResult.datos.sort((a, b) => a[campo] - b[campo]);
+          if (queryParams.orden === "asc") resultado.facturasResult.datos = [...resultado.facturasResult.datos].sort((a, b) => a[campo] - b[campo]);
           else if (queryParams.orden === "desc") {
-            resultado.facturasResult.datos.sort((a, b) => b[campo] - a[campo]);
+            resultado.facturasResult.datos = [...resultado.facturasResult.datos].sort((a, b) => b[campo] - a[campo]);
           } else {
             facturas = null;
             resultado.error = generaError("el orden solo puede ser asc o desc", 400);
           }
         } else {
-          resultado.facturasResult.datos = resultado.facturasResult.datos.sort((a, b) => a[campo] - b[campo]);
+          resultado.facturasResult.datos = [...resultado.facturasResult.datos].sort((a, b) => a[campo] - b[campo]);
         }
       } else {
         facturas = null;
