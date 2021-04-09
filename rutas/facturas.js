@@ -42,7 +42,7 @@ router.get("/", (req, res, next) => {
 });
 
 router.get("/factura/:idFactura",
-  check("id", "No existe la factura").custom(compruebaId),
+  check("idFactura", "No existe la factura").custom(compruebaId),
   (req, res, next) => {
     const idFacura = +req.params.idFactura;
     const { factura, error } = getFactura(idFacura);

@@ -10,12 +10,7 @@ const getFactura = id => {
     factura: null,
     error: null
   };
-  if (factura) {
-    respuesta.factura = factura;
-  } else {
-    const error = generaError("La factura no existe", 404);
-    respuesta.error = error;
-  }
+  respuesta.factura = factura;
   return respuesta;
 };
 
