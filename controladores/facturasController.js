@@ -1,5 +1,5 @@
 const { generaError } = require("../utils/errors");
-const facturasJSON = require("../facturas.json").facturas;
+let facturasJSON = require("../facturas.json").facturas;
 const facturasParamsQuery = require("../utils/facturasParamsQuery");
 
 const getFacturas = (query) => facturasParamsQuery(query, facturasJSON);
@@ -69,11 +69,23 @@ const modificarFactura = (idFactura, cambios) => {
   return respuesta;
 };
 
+const borrarFactura = idFactura => {
+  const factura = facturasJSON.find(factura => factura.id === idFactura);
+  const respuesta = {
+    factura: null,
+    error: null
+  };
+  facturasJSON = facturasJSON.filter(factura => factura.id !== idFactura);
+  respuesta.factura = factura;
+  return respuesta;
+};
+
 module.exports = {
   getFacturas,
   getFactura,
   getFacturasTipo,
   crearFactura,
   sustituirFactura,
-  modificarFactura
+  modificarFactura,
+  borrarFactura
 };

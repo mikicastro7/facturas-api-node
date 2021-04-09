@@ -6,7 +6,7 @@ const facturasJSON = require("../facturas.json").facturas;
 const { badRequestError, idNoExisteError } = require("../utils/errors");
 
 const {
-  getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura, modificarFactura
+  getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura, modificarFactura, borrarFactura
 } = require("../controladores/facturasController");
 
 const compruebaId = idFactura => facturasJSON.find(factura => factura.id === +idFactura);
@@ -139,7 +139,6 @@ router.patch("/factura/:idFactura",
   check("idFactura", "No existe la factura").custom(compruebaId),
   checkSchema(facturaParcialSchema),
   (req, res, next) => {
-    console.log(req.body);
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
@@ -151,6 +150,26 @@ router.patch("/factura/:idFactura",
     const idFactura = +req.params.idFactura;
     const facturaModificada = req.body;
     const { error, factura } = modificarFactura(idFactura, facturaModificada);
+    if (error) {
+      next(error);
+    } else {
+      res.json(factura);
+    }
+  });
+
+router.delete("/factura/:idFactura",
+  check("idFactura", "No existe la factura").custom(compruebaId),
+  async (req, res, next) => {
+    const error400 = badRequestError(req);
+    if (error400) {
+      return next(error400);
+    }
+    const errorIdNoExiste = idNoExisteError(req);
+    if (errorIdNoExiste) {
+      return next(errorIdNoExiste);
+    }
+    const idFactura = +req.params.idFactura;
+    const { error, factura } = borrarFactura(idFactura);
     if (error) {
       next(error);
     } else {
