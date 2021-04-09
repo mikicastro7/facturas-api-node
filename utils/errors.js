@@ -2,8 +2,8 @@ const debug = require("debug")("facturas:errores");
 const chalk = require("chalk");
 const { validationResult } = require("express-validator");
 
-const generaError = (mensaje, status) => {
-  const error = new Error(mensaje);
+const generaError = (arrayMensajes, status) => {
+  const error = new Error(arrayMensajes);
   error.codigo = status;
   return error;
 };
@@ -31,12 +31,15 @@ const generalError = (err, req, res, next) => {
 const badRequestError = req => {
   const errores = validationResult(req);
   let error;
+  const mesnsajesErrores = [];
   if (!errores.isEmpty()) {
     const mapaErrores = errores.mapped();
-    if (mapaErrores.nota || mapaErrores.nombre || mapaErrores.apellidos) {
-      error = generaError("El alumno no tiene la forma correcta", 400);
-      console.log(errores.mapped());
+    // eslint-disable-next-line guard-for-in
+    for (error in mapaErrores) {
+      mesnsajesErrores.push(mapaErrores[error].msg);
     }
+    error = generaError("bad request datos mal formatados", 400);
+    console.log(mesnsajesErrores);
   }
   return error;
 };

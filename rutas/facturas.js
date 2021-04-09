@@ -1,9 +1,9 @@
 const express = require("express");
-const { checkSchema, check, validationResult } = require("express-validator");
+const { checkSchema, check } = require("express-validator");
 
 const router = express.Router();
 const facturasJSON = require("../facturas.json").facturas;
-const { generaError, badRequestError, idNoExisteError } = require("../utils/errors");
+const { badRequestError, idNoExisteError } = require("../utils/errors");
 
 const {
   getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura, modificarFactura
@@ -25,10 +25,6 @@ const facturasShema = {
       errorMessage: "El tipo IVA es integer",
     }
   },
-  tipo: {
-    options: [["gasto", "ingreso"]],
-  }
-
 };
 
 router.get("/", (req, res, next) => {
@@ -78,7 +74,6 @@ router.post("/factura",
       return next(error400);
     }
     const nuevaFactura = req.body;
-    console.log(nuevaFactura);
     const { factura, error } = crearFactura(nuevaFactura);
     if (error) {
       next(error);
