@@ -38,7 +38,7 @@ const badRequestError = req => {
     for (error in mapaErrores) {
       mesnsajesErrores.push(mapaErrores[error].msg);
     }
-    error = generaError("bad request datos mal formatados", 400);
+    error = generaError("bad request", 400);
     console.log(mesnsajesErrores);
   }
   return error;

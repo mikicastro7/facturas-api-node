@@ -11,26 +11,52 @@ const {
 
 const compruebaId = idFactura => facturasJSON.find(factura => factura.id === +idFactura);
 
-const facturasShema = {
-  vencimiento: {
+const getFacturaShema = tipoValidacion => {
+  const vencimiento = {
     optional: true,
-  },
-  base: {
+  };
+  const base = {
     isFloat: {
       errorMessage: "la base es un float",
     }
-  },
-  tipoIva: {
+  };
+  const tipoIva = {
     isInt: {
       errorMessage: "El tipo IVA es integer",
     }
-  },
-  tipo: {
+  };
+  const tipo = {
     custom: {
       options: value => value === "gasto" || value === "ingreso"
     }
+  };
+
+  switch (tipoValidacion) {
+    case "completo":
+      base.exists = {
+        errorMessage: "Falta la base"
+      };
+      tipoIva.exists = true;
+      tipo.exists = true;
+      break;
+    case "parcial":
+    default:
+      base.optional = true;
+      tipoIva.optional = true;
+      tipo.optional = true;
+      break;
   }
+
+  return {
+    vencimiento,
+    base,
+    tipoIva,
+    tipo
+  };
 };
+
+const facturaCompletaSchema = getFacturaShema("completo");
+const facturaParcialSchema = getFacturaShema("parcial");
 
 router.get("/", (req, res, next) => {
   const { facturas, error } = getFacturas(req.query);
@@ -44,6 +70,10 @@ router.get("/", (req, res, next) => {
 router.get("/factura/:idFactura",
   check("idFactura", "No existe la factura").custom(compruebaId),
   (req, res, next) => {
+    const error400 = badRequestError(req);
+    if (error400) {
+      return next(error400);
+    }
     const idFacura = +req.params.idFactura;
     const { factura, error } = getFactura(idFacura);
     if (error) {
@@ -72,7 +102,7 @@ router.get("/gastos", (req, res, next) => {
 });
 
 router.post("/factura",
-  checkSchema(facturasShema),
+  checkSchema(facturaCompletaSchema),
   (req, res, next) => {
     const error400 = badRequestError(req);
     if (error400) {
@@ -88,8 +118,9 @@ router.post("/factura",
   });
 
 router.put("/factura/:idFactura",
-  checkSchema(facturasShema),
+  checkSchema(facturaCompletaSchema),
   (req, res, next) => {
+    console.log(req.body);
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
@@ -105,8 +136,9 @@ router.put("/factura/:idFactura",
   });
 
 router.patch("/factura/:idFactura",
-  checkSchema(facturasShema),
+  checkSchema(facturaParcialSchema),
   (req, res, next) => {
+    console.log(req.body);
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
