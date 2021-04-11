@@ -1,7 +1,7 @@
 const { DataTypes, Sequelize } = require("sequelize");
 const sequelize = require("../db");
 
-const Factura = sequelize.define("Factura", {
+const Factura = sequelize.define("factura", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -33,6 +33,10 @@ const Factura = sequelize.define("Factura", {
     type: DataTypes.TINYINT,
     allowNull: false,
     defaultValue: 0
+  },
+  tipo: {
+    type: DataTypes.STRING(20),
+    allowNull: false
   }
 });
 

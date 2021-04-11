@@ -9,6 +9,9 @@ const sequelize = new Sequelize({
   username: "practicas",
   password: "practicas",
   dialect: "mysql",
+  define: {
+    timestamps: false
+  },
   logging: mensaje => debug(chalk.blue("Ésta es la consulta SQL: "), chalk.green(mensaje))
 });
 

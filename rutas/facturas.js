@@ -1,120 +1,67 @@
 const express = require("express");
 const { checkSchema, check } = require("express-validator");
+const options = require("../parametrosCLI");
 
 const router = express.Router();
 const facturasJSON = require("../facturas.json").facturas;
-const { badRequestError, idNoExisteError } = require("../utils/errors");
+const { badRequestError } = require("../utils/errors");
 
+const getFacturaShema = require("../dataShemas/facturaSchema");
 const {
   getFacturas, getFactura, getFacturasTipo, crearFactura, sustituirFactura, modificarFactura, borrarFactura
 } = require("../controladores/facturasController");
 
-const compruebaId = idFactura => facturasJSON.find(factura => factura.id === +idFactura);
+const {
+  getFacturasBD, getFacturaBD, getFacturasTipoBD, crearFacturaBD, sustituirFacturaBD, modificarFacturaBD, borrarFacturaBD
+} = require("../controladores/facturasBDController");
 
-const getFacturaShema = tipoValidacion => {
-  const vencimiento = {
-    optional: true,
-  };
-  const base = {
-    isFloat: {
-      errorMessage: "la base es un float",
-    }
-  };
-  const tipoIva = {
-    isInt: {
-      errorMessage: "El tipo IVA es integer",
-    }
-  };
-  const tipo = {
-    custom: {
-      options: value => value === "gasto" || value === "ingreso"
-    }
-  };
+const obtenerRespuesta = require("../utils/obtenerRespuestaFacturas");
 
-  switch (tipoValidacion) {
-    case "completo":
-      base.exists = {
-        errorMessage: "Falta la base"
-      };
-      tipoIva.exists = true;
-      tipo.exists = true;
-      break;
-    case "parcial":
-    default:
-      base.optional = true;
-      tipoIva.optional = true;
-      tipo.optional = true;
-      break;
+const fuente = "BD";
+
+const compruebaId = idFactura => {
+  if (fuente === "JSON") {
+    return facturasJSON.find(factura => factura.id === +idFactura);
+  } else {
+    return true;
   }
-
-  return {
-    vencimiento,
-    base,
-    tipoIva,
-    tipo
-  };
 };
 
 const facturaCompletaSchema = getFacturaShema("completo");
 const facturaParcialSchema = getFacturaShema("parcial");
 
-router.get("/", (req, res, next) => {
-  const { facturas, error } = getFacturas(req.query);
-  if (error) {
-    next(error);
-  } else {
-    res.json(facturas);
-  }
+router.get("/", async (req, res, next) => {
+  obtenerRespuesta(getFacturas, getFacturasBD, req, res, next, req.query);
 });
 
 router.get("/factura/:idFactura",
   check("idFactura", "No existe la factura").custom(compruebaId),
-  (req, res, next) => {
+  async (req, res, next) => {
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
     }
     const idFacura = +req.params.idFactura;
-    const { factura, error } = getFactura(idFacura);
-    if (error) {
-      next(error);
-    } else {
-      res.json(factura);
-    }
+    obtenerRespuesta(getFactura, getFacturaBD, req, res, next, idFacura);
   });
 
-router.get("/ingresos", (req, res, next) => {
-  const { facturas, error } = getFacturasTipo("ingreso", req.query);
-  if (error) {
-    next(error);
-  } else {
-    res.json(facturas);
-  }
+router.get("/ingresos", async (req, res, next) => {
+  obtenerRespuesta(getFacturasTipo, getFacturasTipoBD, req, res, next, "ingreso", req.query);
 });
 
-router.get("/gastos", (req, res, next) => {
-  const { facturas, error } = getFacturasTipo("gasto", req.query);
-  if (error) {
-    next(error);
-  } else {
-    res.json(facturas);
-  }
+router.get("/gastos", async (req, res, next) => {
+  obtenerRespuesta(getFacturasTipo, getFacturasTipoBD, req, res, next, "gasto", req.query);
 });
 
 router.post("/factura",
   checkSchema(facturaCompletaSchema),
-  (req, res, next) => {
+  async (req, res, next) => {
     const error400 = badRequestError(req);
     if (error400) {
       return next(error400);
     }
     const nuevaFactura = req.body;
-    const { factura, error } = crearFactura(nuevaFactura);
-    if (error) {
-      next(error);
-    } else {
-      res.json({ factura });
-    }
+    obtenerRespuesta(crearFactura, crearFacturaBD, req, res, next, nuevaFactura);
   });
 
 router.put("/factura/:idFactura",
@@ -126,13 +73,8 @@ router.put("/factura/:idFactura",
       return next(error400);
     }
     const nuevaFactura = req.body;
-    console.log(nuevaFactura);
-    const { factura, error } = sustituirFactura(+req.params.idFactura, nuevaFactura);
-    if (error) {
-      next(error);
-    } else {
-      res.json({ factura });
-    }
+    const idFactura = req.params.idFactura;
+    obtenerRespuesta(sustituirFactura, sustituirFacturaBD, req, res, next, idFactura, nuevaFactura);
   });
 
 router.patch("/factura/:idFactura",
@@ -143,18 +85,9 @@ router.patch("/factura/:idFactura",
     if (error400) {
       return next(error400);
     }
-    const errorIdNoExiste = idNoExisteError(req);
-    if (errorIdNoExiste) {
-      return next(errorIdNoExiste);
-    }
     const idFactura = +req.params.idFactura;
     const facturaModificada = req.body;
-    const { error, factura } = modificarFactura(idFactura, facturaModificada);
-    if (error) {
-      next(error);
-    } else {
-      res.json(factura);
-    }
+    obtenerRespuesta(modificarFactura, modificarFacturaBD, req, res, next, idFactura, facturaModificada);
   });
 
 router.delete("/factura/:idFactura",
@@ -164,17 +97,8 @@ router.delete("/factura/:idFactura",
     if (error400) {
       return next(error400);
     }
-    const errorIdNoExiste = idNoExisteError(req);
-    if (errorIdNoExiste) {
-      return next(errorIdNoExiste);
-    }
     const idFactura = +req.params.idFactura;
-    const { error, factura } = borrarFactura(idFactura);
-    if (error) {
-      next(error);
-    } else {
-      res.json(factura);
-    }
+    obtenerRespuesta(borrarFactura, borrarFacturaBD, req, res, next, idFactura);
   });
 
 module.exports = router;
