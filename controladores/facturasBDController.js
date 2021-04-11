@@ -1,4 +1,3 @@
-const { Op } = require("sequelize");
 const { generaError } = require("../utils/errors");
 const Factura = require("../db/modelos/facturas");
 const facturasParamsQuery = require("../utils/facturasParamsQuery");
