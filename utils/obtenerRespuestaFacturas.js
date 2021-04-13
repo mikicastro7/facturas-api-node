@@ -1,7 +1,6 @@
 const fuente = "BD";
 
 const obtenerRespuesta = async (funcionControlador, funcionControladorBD, req, res, next, ...args) => {
-  console.log(args.join());
   if (fuente === "JSON") {
     const { facturas, error } = funcionControlador(...args);
     if (error) {
@@ -10,7 +9,6 @@ const obtenerRespuesta = async (funcionControlador, funcionControladorBD, req, r
       res.json(facturas);
     }
   } else if (fuente === "BD") {
-    console.log(...args);
     const { factura, facturas, error } = await funcionControladorBD(...args);
     if (error) {
       next(error);

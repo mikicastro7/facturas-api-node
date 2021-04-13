@@ -1,8 +1,24 @@
+const { Op } = require("sequelize");
 const { generaError } = require("../utils/errors");
 const Factura = require("../db/modelos/facturas");
 const facturasParamsQuery = require("../utils/facturasParamsQuery");
 
+const generarObjetoFiltrarQuery = (query) => {
+  const objetoQuery = { where: {} };
+  if (query.abonadas) {
+    objetoQuery.where.abonadas = query.abonadas;
+  }
+  if (query.vencidas) {
+    objetoQuery.where.vencidas = {
+      [Op.gt]: new Date().getTime()
+    };
+  }
+  return objetoQuery;
+};
+
 const getFacturasBD = async query => {
+  console.log(generarObjetoFiltrarQuery(query));
+
   const facturas = await Factura.findAll();
   return facturasParamsQuery(query, facturas);
 };
@@ -47,7 +63,6 @@ const crearFacturaBD = async nuevaFactura => {
 
 const sustituirFacturaBD = async (idFactura, facturaModificada) => {
   const facturaEncontrada = await Factura.findByPk(idFactura);
-  console.log(idFactura);
   const respuesta = {
     factura: null,
     error: null
