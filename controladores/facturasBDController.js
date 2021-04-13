@@ -6,21 +6,60 @@ const facturasParamsQuery = require("../utils/facturasParamsQuery");
 const generarObjetoFiltrarQuery = (query) => {
   const objetoQuery = { where: {} };
   if (query.abonadas) {
-    objetoQuery.where.abonadas = query.abonadas;
+    if (query.abonadas === "true") {
+      objetoQuery.where.abonada = true;
+    } else if (query.abonadas === "false") {
+      objetoQuery.where.abonada = false;
+    }
   }
+
   if (query.vencidas) {
-    objetoQuery.where.vencidas = {
-      [Op.gt]: new Date().getTime()
-    };
+    if (query.vencidas === "true") {
+      objetoQuery.where.vencimiento = { [Op.gt]: new Date().getTime() };
+    } else if (query.vencidas === "false") {
+      objetoQuery.where.vencimiento = {
+        [Op.lt]: new Date().getTime()
+      };
+    }
+  }
+
+  if (query.ordenPor) {
+    const campo = query.ordenPor;
+    if (query.orden) {
+      if (query.orden === "asc" || query.orden === "desc") {
+        objetoQuery.order = [[campo, query.orden.toUpperCase()]];
+      }
+    } else {
+      objetoQuery.order = [[campo, "ASC"]];
+    }
+  }
+
+  if (query.nPorPagina) {
+    if (query.pagina) {
+      objetoQuery.offset = query.nPorPagina * (query.pagina - 1);
+      objetoQuery.limit = query.nPorPagina * query.pagina;
+    }
+    objetoQuery.limit = +query.nPorPagina;
+  }
+
+  if (query.pagina && !query.nPorPagina) {
+    const nPorPagina = 5;
+    objetoQuery.offset = nPorPagina * (query.pagina - 1);
+    objetoQuery.limit = nPorPagina * query.pagina;
   }
   return objetoQuery;
 };
 
 const getFacturasBD = async query => {
-  console.log(generarObjetoFiltrarQuery(query));
-
-  const facturas = await Factura.findAll();
-  return facturasParamsQuery(query, facturas);
+  const facturas = await Factura.findAll(generarObjetoFiltrarQuery(query));
+  const result = {
+    error: null,
+    facturas: {
+      total: facturas.length,
+      datos: facturas
+    }
+  };
+  return result;
 };
 
 const getFacturaBD = async id => {
@@ -33,12 +72,17 @@ const getFacturaBD = async id => {
 };
 
 const getFacturasTipoBD = async (tipo, query) => {
-  const facturas = await Factura.findAll({
-    where: {
-      tipo
+  const objetoQuery = generarObjetoFiltrarQuery(query);
+  objetoQuery.where.tipo = tipo;
+  const facturas = await Factura.findAll(objetoQuery);
+  const result = {
+    error: null,
+    facturas: {
+      total: facturas.length,
+      datos: facturas
     }
-  });
-  return facturasParamsQuery(query, facturas);
+  };
+  return result;
 };
 
 const crearFacturaBD = async nuevaFactura => {
