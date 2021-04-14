@@ -3,7 +3,7 @@ const debug = require("debug")("alumnos:db");
 const chalk = require("chalk");
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost/alumnos", {
+mongoose.connect("mongodb://localhost/proyectos", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false

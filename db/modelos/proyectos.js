@@ -22,7 +22,9 @@ const ProyectoSchema = new Schema({
     required: true
   },
   tecnologias: {
-    type: Array,
+    type: [{
+      type: String
+    }],
     required: true
   }
 });
